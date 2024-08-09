@@ -5,12 +5,13 @@ def chat_with_chatgpt(user_message, openai_api_key):
     # 利用OpenAI類別，建立一個可以跟OpenAI伺服器互動的物件
     client = OpenAI(api_key=openai_api_key)
 
+    message = user_message + '  請用條列式的方式回答。'
     # 完成一段對話
     chat_completion = client.chat.completions.create(
         messages=[
             {
                 "role": "user",
-                "content": user_message,
+                "content": message,
             }
         ],
         model="gpt-3.5-turbo",
