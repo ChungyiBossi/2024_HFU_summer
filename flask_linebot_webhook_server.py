@@ -21,7 +21,9 @@ from linebot.v3.webhooks import (
     MessageEvent, # 傳輸過來的方法
     TextMessageContent # 使用者傳過來的資料格式
 )
+import os
 from handle_keys import get_secret_and_token
+from openai_api import chat_with_chatgpt
 
 app = Flask(__name__)
 keys = get_secret_and_token()
@@ -62,13 +64,21 @@ def handle_message(event):
     # eg. MessageEvent 代表使用者單純傳訊息的事件
     # TextMessageContent 代表使用者傳輸的訊息內容是文字
     # 符合兩個條件的事件，會被handle_message 所處理
+    
+    user_message = event.message.text # 使用者傳過來的訊息
+    api_key = os.getenv("OPENAI_API_KEY", None)
+    if api_key and user_message:
+        response = chat_with_chatgpt(user_message, api_key)
+    else:
+        response = "呼叫ChatGPT錯誤了，請檢察。"
+    
     with ApiClient(configuration) as api_client:
         line_bot_api = MessagingApi(api_client)
         line_bot_api.reply_message_with_http_info(
             ReplyMessageRequest(
                 reply_token=event.reply_token,
                 messages=[
-                    TextMessage(text=event.message.text)
+                    TextMessage(text=response)
                 ]
             )
         )

@@ -17,7 +17,7 @@ def chat_with_chatgpt(user_message, openai_api_key):
     )
 
     response = chat_completion.choices[0].message.content
-    return response
+    return response if response else "No Content."
 
 if __name__ == '__main__':
     user_message = "我愛喝波蜜果菜汁，你說你愛不愛。"
