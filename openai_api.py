@@ -3,20 +3,20 @@ import os
 from pprint import pprint
 
 
-{
-    'user_id_a': [
-        {'role': 'user', 'content': 'xxx'},
-        {'role': 'system', 'content': 'yyy'},
-        {'role': 'user', 'content': 'xxx'},
-        {'role': 'system', 'content': 'yyy'},
-    ],
-    'user_id_b': [
-        {'role': 'user', 'content': 'aaa'},
-        {'role': 'system', 'content': 'bbb'},
-        {'role': 'user', 'content': 'ccc'},
-        {'role': 'system', 'content': 'ddd'},
-    ]
-}
+# {
+#     'user_id_a': [
+#         {'role': 'user', 'content': 'xxx'},
+#         {'role': 'system', 'content': 'yyy'},
+#         {'role': 'user', 'content': 'xxx'},
+#         {'role': 'system', 'content': 'yyy'},
+#     ],
+#     'user_id_b': [
+#         {'role': 'user', 'content': 'aaa'},
+#         {'role': 'system', 'content': 'bbb'},
+#         {'role': 'user', 'content': 'ccc'},
+#         {'role': 'system', 'content': 'ddd'},
+#     ]
+# }
 
 chat_history = dict()
 
