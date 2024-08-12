@@ -64,10 +64,11 @@ def handle_message(event):
     # eg. MessageEvent 代表使用者單純傳訊息的事件
     # TextMessageContent 代表使用者傳輸的訊息內容是文字
     # 符合兩個條件的事件，會被handle_message 所處理
-    
+    user_id = event.source.user_id # 使用者的ID
+    # print("User ID", user_id)
     user_message = event.message.text # 使用者傳過來的訊息
     api_key = keys["OPENAI_API_KEY"]
-    response = chat_with_chatgpt(user_message, api_key)
+    response = chat_with_chatgpt(user_id, user_message, api_key)
     
     with ApiClient(configuration) as api_client:
         line_bot_api = MessagingApi(api_client)
