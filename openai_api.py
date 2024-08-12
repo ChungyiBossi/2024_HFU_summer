@@ -45,7 +45,7 @@ def chat_with_chatgpt(user_id, user_message, openai_api_key):
 
 if __name__ == '__main__':
     api_key = os.getenv("OPENAI_API_KEY", None)
-
+    user_id = "XXX"
     while True:
         user_message = input("請輸入一句話，跟ChatGPT聊天 :")
         if user_message == 'quit':
@@ -53,7 +53,7 @@ if __name__ == '__main__':
             break
 
         if api_key and user_message:
-            response = chat_with_chatgpt(user_message, api_key)
+            response = chat_with_chatgpt(user_id, user_message, api_key)
             print("ChatGPT say:", response)
         else:
             print("api key not found: ", api_key)
