@@ -26,7 +26,6 @@ def get_cities_weather(cwa_api_key: str, locations_name: list):
     cities_weather = dict()
     # 每一個location
     for location in weather_data['records']['location']:
-        print(location['locationName']) # 城市名稱
         city_name = location['locationName']
         city_weather = get_city_weather(location)
         cities_weather[city_name] = city_weather

@@ -71,7 +71,7 @@ def handle_message(event):
 
     # 假定的格式: 特務P天氣如何 臺中市 桃園市 彰化市
     if '特務P天氣如何' in user_message:
-        response = handle_weather(user_id, user_message, api_key)
+        response = handle_weather(user_id, user_message)
     else:
         # 閒聊
         response = chat_with_chatgpt(user_id, user_message, api_key)
@@ -87,7 +87,7 @@ def handle_message(event):
             )
         )
 
-def handle_weather(user_id, user_message, chatgpt_api_key):
+def handle_weather(user_id, user_message, chatgpt_api_key=keys['OPENAI_API_KEY']):
     # 問天氣
     cwa_api_key = keys['CWA_API_KEY']
     locations_name = user_message.split()[1:]
