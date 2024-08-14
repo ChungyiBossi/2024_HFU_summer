@@ -69,8 +69,8 @@ def handle_message(event):
     user_message = event.message.text # 使用者傳過來的訊息
     api_key = keys["OPENAI_API_KEY"]
 
-    # 假定的格式: 特務P天氣如何 臺中市 桃園市 彰化市
     if '特務P天氣如何' in user_message:
+        # 假定的格式: 特務P天氣如何 臺中市 桃園市 彰化市
         response = handle_weather(user_id, user_message)
     else:
         # 閒聊
