@@ -35,9 +35,9 @@ while True:
     # Predicts the model
     prediction = model(image)
     # prediction = model.predict(image)
-    index = np.argmax(prediction)
-    class_name = class_names[index]
-    confidence_score = prediction[0][index]
+    index = np.argmax(prediction) # 最高分的label的編號
+    class_name = class_names[index] # label編號的對應名稱
+    confidence_score = prediction[0][index] # label編號對應的分數
 
     # Print prediction and confidence score
     print("Class:", class_name[2:], end="")
@@ -50,7 +50,6 @@ while True:
     if keyboard_input == 27:
         break
 
-    
 
 camera.release()
 cv2.destroyAllWindows()
