@@ -2,7 +2,6 @@
 import tensorflow as tf
 import cv2  # Install opencv-python
 import numpy as np
-import time
 
 # Disable scientific notation for clarity
 np.set_printoptions(suppress=True)
