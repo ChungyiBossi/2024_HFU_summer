@@ -27,11 +27,14 @@ with GestureRecognizer.create_from_options(options) as recognizer:
     gesture_recognition_result = recognizer.recognize(mp_image)
 
     # print result
-    top_gesture = gesture_recognition_result.gestures[0][0]
-    hand_landmarks = gesture_recognition_result.hand_landmarks[0]
-    print("Top Gesture: ", top_gesture.category_name, top_gesture.score)
-    for landmark in hand_landmarks:
-        print("Landmark: ", round(landmark.x, 3), round(landmark.y, 3), round(landmark.z, 3))
+    top_gesture = gesture_recognition_result.gestures
+    hand_landmarks = gesture_recognition_result.hand_landmarks
+    if top_gesture and hand_landmarks: # 是否有判斷出手勢 & 判斷出手
+        top_gesture = top_gesture[0][0]
+        hand_landmarks = hand_landmarks[0]
+        print("Top Gesture: ", top_gesture.category_name, top_gesture.score)
+        for landmark in hand_landmarks:
+            print("Landmark: ", round(landmark.x, 3), round(landmark.y, 3), round(landmark.z, 3))
 
 # 目的：把拿到的手指節點(hand landmarks)，以及點跟點之間的連結，畫在圖上
 import cv2
