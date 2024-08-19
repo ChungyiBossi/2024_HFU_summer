@@ -1,6 +1,4 @@
 import mediapipe as mp # 通常會縮寫成mp
-# from mediapipe.tasks import python
-# from mediapipe.tasks.python import vision
 
 # 實際上工作的類別
 GestureRecognizer = mp.tasks.vision.GestureRecognizer 
@@ -34,13 +32,12 @@ with GestureRecognizer.create_from_options(options) as recognizer:
     print("Top Gesture: ", top_gesture.category_name, top_gesture.score)
     for landmark in hand_landmarks:
         print("Landmark: ", round(landmark.x, 3), round(landmark.y, 3), round(landmark.z, 3))
-    
 
 # 目的：把拿到的手指節點(hand landmarks)，以及點跟點之間的連結，畫在圖上
 import cv2
 from mediapipe.framework.formats import landmark_pb2 # 型態轉換
 
-# (22-24)
+# 繪圖設定(22-24)
 mp_hands = mp.solutions.hands  # 手部的一些設定
 mp_drawing = mp.solutions.drawing_utils # 繪畫的設定
 mp_drawing_styles = mp.solutions.drawing_styles # 線條的風格
@@ -55,6 +52,7 @@ hand_landmarks_proto.landmark.extend([
 ])
 
 # 把MediaPipe(pillow)圖片 --> cv2 image (numpy array)
+# https://stackoverflow.com/questions/14134892/convert-image-from-pil-to-opencv-format
 annotate_image = mp_image.numpy_view()[:, :, ::-1].copy()
 
 # (68-73)
