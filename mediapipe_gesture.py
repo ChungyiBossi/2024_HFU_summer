@@ -1,6 +1,6 @@
 import mediapipe as mp # 通常會縮寫成mp
-from mediapipe.tasks import python
-from mediapipe.tasks.python import vision
+# from mediapipe.tasks import python
+# from mediapipe.tasks.python import vision
 
 # 實際上工作的類別
 GestureRecognizer = mp.tasks.vision.GestureRecognizer 
@@ -19,7 +19,7 @@ with open(model_path, 'rb') as model: # 建立檔案和程式碼的通道
 # 組合你的各種設定
 options = GestureRecognizerOptions(
     base_options=BaseOptions(
-        model_asset_buffer=model_file),
+        model_asset_buffer=model_file), # 直接讀模型的binary內容，丟給物件。
     running_mode=VisionRunningMode.IMAGE)
 
 with GestureRecognizer.create_from_options(options) as recognizer:
@@ -29,5 +29,9 @@ with GestureRecognizer.create_from_options(options) as recognizer:
     gesture_recognition_result = recognizer.recognize(mp_image)
 
     # print result
-    print(gesture_recognition_result)
+    top_gesture = gesture_recognition_result.gestures[0][0]
+    hand_landmarks = gesture_recognition_result.hand_landmarks[0]
+    print("Top Gesture: ", top_gesture.category_name, top_gesture.score)
+    for landmark in hand_landmarks:
+        print("Landmark: ", round(landmark.x, 3), round(landmark.y, 3), round(landmark.z, 3))
     
