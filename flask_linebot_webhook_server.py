@@ -90,7 +90,7 @@ def handle_message(event):
 def handle_weather(user_id, user_message, chatgpt_api_key=keys['OPENAI_API_KEY']):
     # 問天氣
     cwa_api_key = keys['CWA_API_KEY']
-    locations_name = user_message.split()[1:]
+    locations_name = user_message.split()[1:] # 取得地點 > NLP:實體辨識
     if locations_name: # 有地點才做事情
         weather_data = get_cities_weather(cwa_api_key, locations_name)
         '''
