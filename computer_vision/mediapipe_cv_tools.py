@@ -66,8 +66,74 @@ def recognize_gesture_realtime(model, camera_id):
             is_collection_start = False
     cv2.destroyWindow(window_name)
 
+
+def init_face_detector(model_path):
+    FaceDetector = mp.tasks.vision.FaceDetector
+    FaceDetectorOptions = mp.tasks.vision.FaceDetectorOptions
+    BaseOptions = mp.tasks.BaseOptions 
+    VisionRunningMode = mp.tasks.vision.RunningMode
+    with open(model_path, 'rb') as model:
+        model_file = model.read()
+    # 組合你的各種設定
+    options = FaceDetectorOptions(
+        base_options=BaseOptions(model_asset_buffer=model_file),
+        running_mode=VisionRunningMode.IMAGE
+    )
+    return FaceDetector.create_from_options(options)
+
+def detect_face(model, cv2_frame):
+    mp_image = mp.Image(image_format=mp.ImageFormat.SRGB, data=cv2_frame)
+    face_detection_result = model.detect(mp_image)
+    # for detection in face_detection_result.detections:
+    #     # Draw bounding_box
+    #     bbox = detection.bounding_box
+    #     start_point = bbox.origin_x, bbox.origin_y
+    #     end_point = bbox.origin_x + bbox.width, bbox.origin_y + bbox.height
+    #     cv2.rectangle(annotated_image, start_point, end_point, TEXT_COLOR, 3)
+    return face_detection_result.detections
+
+def detect_face_realtime(model, camera_id):
+    window_name = "Face Detection"
+    camera = cv2.VideoCapture(camera_id)
+    is_collection_start = False # 預設不會一開始就蒐集
+    while True:
+        is_success, frame = camera.read()  # 從camera取得資料
+        if is_success:
+            show_frame = frame.copy() # Copy frame for display
+            put_cv2_text(show_frame, f"Collecting: {is_collection_start}", (30, 50)) # 顯示出是否蒐集中?
+            if is_collection_start: # 要蒐集
+                detections = detect_face(model, frame)
+                for detection in detections:
+                    # Draw bounding_box
+                    bbox = detection.bounding_box
+                    start_point = bbox.origin_x, bbox.origin_y # 左上錨點
+                    end_point = bbox.origin_x + bbox.width, bbox.origin_y + bbox.height # 右下錨點
+                    cv2.rectangle(show_frame, start_point, end_point, (0, 255, 255), 3)
+                key = cv2.waitKey(100)
+            else: # 不蒐集
+                key = cv2.waitKey(1)
+            cv2.imshow(window_name, show_frame)
+        else:
+            print("Wait for camera ready......")
+            key = cv2.waitKey(1000)
+
+        if key == ord('q') or key == ord("Q"): # 中止
+            break
+        elif key == ord('a') or key == ord('A'): # 開始
+            is_collection_start = True
+        elif key == ord('z') or key == ord('Z'): # 暫停
+            is_collection_start = False
+    cv2.destroyWindow(window_name)
+
 if __name__ == '__main__':
-    model_path = 'cv_models/gesture_recognizer.task'
     camera_id = 1
-    gesture_model = init_gesture_recognizer(model_path)
-    recognize_gesture_realtime(gesture_model, camera_id)
+    
+    # # Gesture
+    # model_path = 'cv_models/gesture_recognizer.task'
+    # gesture_model = init_gesture_recognizer(model_path)
+    # recognize_gesture_realtime(gesture_model, camera_id)
+
+    # Face
+    model_path = 'cv_models/blaze_face_short_range.tflite'
+    face_detection_model = init_face_detector(model_path)
+    detect_face_realtime(face_detection_model, camera_id)
