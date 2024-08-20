@@ -21,7 +21,7 @@ def init_gesture_recognizer(model_path): # 初始化你的手勢辨識模型
     )
     return GestureRecognizer.create_from_options(options)
 
-def recognize_gesture(cv2_frame):
+def recognize_gesture(model, cv2_frame):
     # https://ai.google.dev/edge/api/mediapipe/python/mp/Image
     # cv2 frame -> mp.Image
     mp_image = mp.Image(image_format=mp.ImageFormat.SRGB, data=cv2_frame)
@@ -48,7 +48,7 @@ def recognize_gesture_realtime(model, camera_id):
             put_cv2_text(show_frame, f"Collecting: {is_collection_start}", (30, 50)) # 顯示出是否蒐集中?
             if is_collection_start: # 要蒐集
                 # 辨識手勢
-                top_gesture, score = recognize_gesture(frame)
+                top_gesture, score = recognize_gesture(model, frame)
                 put_cv2_text(show_frame, f"Category: {top_gesture} - {round(score*100, 2)}%", (30, 100)) # 顯示出蒐集類別?
                 key = cv2.waitKey(100)
             else: # 不蒐集
@@ -69,5 +69,5 @@ def recognize_gesture_realtime(model, camera_id):
 if __name__ == '__main__':
     model_path = 'cv_models/gesture_recognizer.task'
     camera_id = 1
-    model = init_gesture_recognizer(model_path)
-    recognize_gesture_realtime(model, camera_id)
+    gesture_model = init_gesture_recognizer(model_path)
+    recognize_gesture_realtime(gesture_model, camera_id)
