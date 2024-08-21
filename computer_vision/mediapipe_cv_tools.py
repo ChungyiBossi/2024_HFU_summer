@@ -21,7 +21,7 @@ def init_gesture_recognizer(model_path): # 初始化你的手勢辨識模型
     )
     return GestureRecognizer.create_from_options(options)
 
-def recognize_gesture(model, cv2_frame):
+def recognize_gesture(model, cv2_frame): # 使用模型辨識，並輸出結果
     # https://ai.google.dev/edge/api/mediapipe/python/mp/Image
     # cv2 frame -> mp.Image
     mp_image = mp.Image(image_format=mp.ImageFormat.SRGB, data=cv2_frame)
@@ -37,7 +37,7 @@ def recognize_gesture(model, cv2_frame):
         print("No Gesture")
         return "None", 1.0
     
-def recognize_gesture_realtime(model, camera_id):
+def recognize_gesture_realtime(model, camera_id): # 動態取得攝像頭擷取，送給模型辨識並畫圖
     window_name = "Gesture Recognization"
     camera = cv2.VideoCapture(camera_id)
     is_collection_start = False # 預設不會一開始就蒐集
@@ -65,7 +65,6 @@ def recognize_gesture_realtime(model, camera_id):
         elif key == ord('z') or key == ord('Z'): # 暫停
             is_collection_start = False
     cv2.destroyWindow(window_name)
-
 
 def init_face_detector(model_path):
     FaceDetector = mp.tasks.vision.FaceDetector
