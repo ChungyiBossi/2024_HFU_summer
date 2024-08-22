@@ -17,7 +17,11 @@ from linebot.v3.messaging import (
     ReplyMessageRequest,
     TextMessage,  # 傳輸回Line官方後台的資料格式
     ImageMessage,
-    TemplateMessage
+    TemplateMessage, 
+    ButtonsTemplate, CarouselTemplate, CarouselColumn, ConfirmTemplate,
+    PostbackAction,
+    MessageAction,
+    URIAction,
 )
 from linebot.v3.webhooks import (
     MessageEvent, # 傳輸過來的方法
@@ -25,7 +29,6 @@ from linebot.v3.webhooks import (
     ImageMessageContent,
     LocationMessageContent
 )
-import os
 from handle_keys import get_secret_and_token
 from openai_api import chat_with_chatgpt
 from data_scraper.cwa_opendata_scraper import get_cities_weather
@@ -79,19 +82,29 @@ def handle_message(event):
 
     if '特務P天氣如何' in user_message:
         # 假定的格式: 特務P天氣如何 臺中市 桃園市 彰化市
-        response = handle_weather(user_id, user_message)
-    else:
-        # 閒聊
-        response = chat_with_chatgpt(user_id, user_message, api_key)
+        responses = [
+            TextMessage(text=handle_weather(user_id, user_message))
+        ]
+    elif "按鈕sample" in user_message:
+        responses = [handle_buttons_template()]
+    elif "輪播sample" in user_message:
+        responses = [handle_carousel_template()]
+    elif "確認sample" in user_message:
+        responses = [hanlde_check_template()]
+    else:# 閒聊
+        responses = [
+            TextMessage(text=chat_with_chatgpt(user_id, user_message, api_key))
+        ]        
+        responses = [
+            TextMessage(text="123")
+        ]
     
     with ApiClient(configuration) as api_client:
         line_bot_api = MessagingApi(api_client)
         line_bot_api.reply_message_with_http_info(
             ReplyMessageRequest(
                 reply_token=event.reply_token,
-                messages=[
-                    TextMessage(text=response)
-                ]
+                messages=responses
             )
         )
 
@@ -121,7 +134,75 @@ def handle_weather(user_id, user_message, chatgpt_api_key=keys['OPENAI_API_KEY']
         response = "請給我你想知道的縣市，請輸入：特務P天氣如何 臺中市 桃園市 彰化市"
     return response
 
-import requests
+def handle_buttons_template(menu_name='Menu', description='Please select'):
+    response = ButtonsTemplate(
+        title=menu_name,
+        text=description,
+        actions=[
+            PostbackAction(
+                label='postback action',
+                display_text='postback text',
+                data='action=buy&itemid=123'
+            ),
+            MessageAction(
+                label='message action',
+                text='message text'
+            ),
+            URIAction(
+                label='uri action',
+                uri='http://example.com/'
+            )
+        ]
+    )
+    return TemplateMessage(
+        type='template',
+        altText="TemplateMessage",
+        template=response
+    )
+
+def handle_carousel_template():
+    carousel = CarouselTemplate(columns=[
+        CarouselColumn(
+            text='按鈕文字',
+            title='按鈕標題',
+            thumbnail_image_url='https://i.imgur.com/fz8h8GO.jpeg',
+            actions=[
+                MessageAction(label='發送文字訊息', text='我發送一個文字訊息'),
+                MessageAction(label='講笑話', text='請告訴我一個笑話'),
+                MessageAction(label='推薦餐廳', text='請推薦一個餐廳給我'),
+            ]
+        ),
+        CarouselColumn(
+            text='連結描述',
+            title='連結標題',
+            thumbnail_image_url='https://i.imgur.com/fz8h8GO.jpeg',
+            actions=[
+                URIAction(label='前往GOOGLE', uri='https://www.google.com'),
+                URIAction(label='每個卡片的欄位', uri='https://www.google.com'),
+                URIAction(label='都要一致，所以補行', uri='https://www.google.com')
+            ]
+        )
+    ])
+    return TemplateMessage(
+        type='template',
+        altText="TemplateMessage",
+        template=carousel
+    )
+
+def hanlde_check_template():
+    response = ConfirmTemplate(
+        text='您確定嗎？',
+        actions=[
+            MessageAction(label='是', text='Yes'),
+            MessageAction(label='否', text='No')
+        ]
+    )
+    return TemplateMessage(
+        type='template',
+        altText="TemplateMessage",
+        template=response
+    )
+
 @handler.add(MessageEvent, message=ImageMessageContent)
 def handle_image(event):
     # 取得圖片

@@ -10,7 +10,9 @@ def get_secret_and_token():
         'LINEBOT_SECRET_KEY',
         'LINEBOT_ACCESS_TOKEN',
         "OPENAI_API_KEY",
-        "CWA_API_KEY"
+        "CWA_API_KEY",
+        "IMGUR_CLIENT_ID",
+        "IMGUR_SECRET_KEY"
     ]
 
     keys = dict()
