@@ -22,6 +22,7 @@ from linebot.v3.messaging import (
     PostbackAction,
     MessageAction,
     URIAction,
+    QuickReply, QuickReplyItem
 )
 from linebot.v3.webhooks import (
     MessageEvent, # 傳輸過來的方法
@@ -86,11 +87,13 @@ def handle_message(event):
             TextMessage(text=handle_weather(user_id, user_message))
         ]
     elif "按鈕sample" in user_message:
-        responses = [handle_buttons_template()]
+        responses = [create_buttons_template()]
     elif "輪播sample" in user_message:
-        responses = [handle_carousel_template()]
+        responses = [create_carousel_template()]
     elif "確認sample" in user_message:
-        responses = [hanlde_check_template()]
+        responses = [create_check_template()]
+    elif "快速回覆sample" in user_message:
+        responses = [create_quick_reply()]
     else:# 閒聊
         responses = [
             TextMessage(text=chat_with_chatgpt(user_id, user_message, api_key))
@@ -134,7 +137,7 @@ def handle_weather(user_id, user_message, chatgpt_api_key=keys['OPENAI_API_KEY']
         response = "請給我你想知道的縣市，請輸入：特務P天氣如何 臺中市 桃園市 彰化市"
     return response
 
-def handle_buttons_template(menu_name='Menu', description='Please select'):
+def create_buttons_template(menu_name='Menu', description='Please select'):
     response = ButtonsTemplate(
         title=menu_name,
         text=description,
@@ -160,7 +163,7 @@ def handle_buttons_template(menu_name='Menu', description='Please select'):
         template=response
     )
 
-def handle_carousel_template():
+def create_carousel_template():
     carousel = CarouselTemplate(columns=[
         CarouselColumn(
             text='按鈕文字',
@@ -189,7 +192,7 @@ def handle_carousel_template():
         template=carousel
     )
 
-def hanlde_check_template():
+def create_check_template():
     response = ConfirmTemplate(
         text='您確定嗎？',
         actions=[
@@ -201,6 +204,19 @@ def hanlde_check_template():
         type='template',
         altText="TemplateMessage",
         template=response
+    )
+
+def create_quick_reply():
+    quick_reply_body = QuickReply(items=[
+        QuickReplyItem(action=MessageAction(label='否', text='No')),
+        QuickReplyItem(action=MessageAction(label='否', text='No')),
+        QuickReplyItem(action=URIAction(label='前往GOOGLE', uri='https://www.google.com'))
+    ])
+
+    return TextMessage(
+        text="超快速回覆",
+        quickReply=quick_reply_body
+        
     )
 
 @handler.add(MessageEvent, message=ImageMessageContent)
