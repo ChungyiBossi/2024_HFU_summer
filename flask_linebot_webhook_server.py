@@ -97,11 +97,7 @@ def handle_message(event):
     else:# 閒聊
         responses = [
             TextMessage(text=chat_with_chatgpt(user_id, user_message, api_key))
-        ]        
-        responses = [
-            TextMessage(text="123")
-        ]
-    
+        ] 
     with ApiClient(configuration) as api_client:
         line_bot_api = MessagingApi(api_client)
         line_bot_api.reply_message_with_http_info(
