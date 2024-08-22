@@ -4,8 +4,8 @@ import os
 def init_imgur_client(client_id, client_secret):
     return ImgurClient(client_id, client_secret)
 
-def upload_to_imgur(image_path, imgur_client):
-    uploaded_image = imgur_client.upload_from_path(image_path)
+def upload_to_imgur(file_path, imgur_client):
+    uploaded_image = imgur_client.upload_from_path(file_path)
     return uploaded_image['link']
 
 if __name__ == '__main__':
