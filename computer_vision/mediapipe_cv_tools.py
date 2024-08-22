@@ -1,6 +1,12 @@
 import mediapipe as mp
 import cv2
-from image_collector import put_cv2_text
+import numpy as np
+try:
+    from .image_collector import put_cv2_text
+    from .image_format_converter import convert_from_bytes_to_cv2, convert_from_cv2_to_bytes
+except Exception:
+    from image_collector import put_cv2_text
+    from image_format_converter import convert_from_bytes_to_cv2, convert_from_cv2_to_bytes
 
 def init_gesture_recognizer(model_path): # 初始化你的手勢辨識模型
     # 實際上工作的類別
@@ -83,13 +89,20 @@ def init_face_detector(model_path):
 def detect_face(model, cv2_frame):
     mp_image = mp.Image(image_format=mp.ImageFormat.SRGB, data=cv2_frame)
     face_detection_result = model.detect(mp_image)
-    # for detection in face_detection_result.detections:
-    #     # Draw bounding_box
-    #     bbox = detection.bounding_box
-    #     start_point = bbox.origin_x, bbox.origin_y
-    #     end_point = bbox.origin_x + bbox.width, bbox.origin_y + bbox.height
-    #     cv2.rectangle(annotated_image, start_point, end_point, TEXT_COLOR, 3)
     return face_detection_result.detections
+
+def detect_face_with_content_drawing(model, image_content): # 針對一張圖的臉部偵測，可畫圖
+    if type(image_content) == bytes: # 做 byte -> cv2.Mat(opencv的image)
+        image_content = convert_from_bytes_to_cv2(image_content)
+    
+    detections = detect_face(model, image_content)
+    for detection in detections:
+        bbox = detection.bounding_box
+        start_point = bbox.origin_x, bbox.origin_y
+        end_point = bbox.origin_x + bbox.width, bbox.origin_y + bbox.height
+        cv2.rectangle(image_content, start_point, end_point, (0, 255, 255), 3)
+    return image_content # 畫好的圖
+
 
 def detect_face_realtime(model, camera_id):
     window_name = "Face Detection"
@@ -132,7 +145,13 @@ if __name__ == '__main__':
     # gesture_model = init_gesture_recognizer(model_path)
     # recognize_gesture_realtime(gesture_model, camera_id)
 
-    # Face
+    # # Face
     model_path = 'cv_models/blaze_face_short_range.tflite'
     face_detection_model = init_face_detector(model_path)
-    detect_face_realtime(face_detection_model, camera_id)
+    # detect_face_realtime(face_detection_model, camera_id) # real-time detection
+
+    with open("test.jpeg", "rb") as image_content: # single image detection
+        output = detect_face_with_content_drawing(face_detection_model, image_content.read())
+        output_bytes = convert_from_cv2_to_bytes(output)
+        with open('test_out.jpeg', 'wb') as file:
+            file.write(output_bytes)

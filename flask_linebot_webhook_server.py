@@ -16,22 +16,28 @@ from linebot.v3.messaging import (
     MessagingApi,
     ReplyMessageRequest,
     TextMessage,  # 傳輸回Line官方後台的資料格式
-    ImageMessage
+    ImageMessage,
+    TemplateMessage
 )
 from linebot.v3.webhooks import (
     MessageEvent, # 傳輸過來的方法
     TextMessageContent, # 使用者傳過來的資料格式
-    ImageMessageContent
+    ImageMessageContent,
+    LocationMessageContent
 )
 import os
 from handle_keys import get_secret_and_token
 from openai_api import chat_with_chatgpt
 from data_scraper.cwa_opendata_scraper import get_cities_weather
+from computer_vision.imgur_uploader import init_imgur_client, upload_to_imgur
+from computer_vision.mediapipe_cv_tools import init_face_detector, detect_face_with_content_drawing
+from computer_vision.image_format_converter import convert_from_cv2_to_bytes
 
 app = Flask(__name__)
 keys = get_secret_and_token()
 handler = WebhookHandler(keys['LINEBOT_SECRET_KEY'])
 configuration = Configuration(access_token=keys['LINEBOT_ACCESS_TOKEN'])
+face_detection_model = init_face_detector('computer_vision/cv_models/blaze_face_short_range.tflite')
 
 @app.route("/")
 def say_hello_world(username=""):
@@ -124,21 +130,38 @@ def handle_image(event):
     header = {
         'Authorization': f'Bearer {keys['LINEBOT_ACCESS_TOKEN']}'
     }
-    # 存圖片
+    
+    temp_image_path = 'image_message.jpeg'
     response = requests.get(image_url, headers=header)
-    if response.status_code == 200:
-        with open('image_message.jpeg', 'wb') as image_file:
-            image_file.write(response.content)
+    if response.status_code == 200: # 取圖片 > 視覺處理 > 存圖
+        # 跑 mediapipe face detection
+        detected_frame = detect_face_with_content_drawing(
+            face_detection_model, image_content=response.content
+        )
+        # 存圖片
+        frame_in_bytes = convert_from_cv2_to_bytes(detected_frame)
+        with open(temp_image_path, 'wb') as image_file:
+            image_file.write(frame_in_bytes)
         response = 'Get image success.'
     else:
         response = 'Get image failed.'
+
+    # imgur upload
+    imgur_client = init_imgur_client(keys['IMGUR_CLIENT_ID'], keys['IMGUR_SECRET_KEY'])
+    imgur_link = upload_to_imgur(temp_image_path, imgur_client)
 
     with ApiClient(configuration) as api_client:
         line_bot_api = MessagingApi(api_client)
         line_bot_api.reply_message_with_http_info(
             ReplyMessageRequest(
                 reply_token=event.reply_token,
-                messages=[TextMessage(text=response)]
+                messages=[
+                    TextMessage(text=response),
+                    ImageMessage(
+                        originalContentUrl=imgur_link,
+                        previewImageUrl=imgur_link
+                    )
+                ]
             )
         )
 
