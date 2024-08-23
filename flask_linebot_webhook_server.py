@@ -17,12 +17,6 @@ from linebot.v3.messaging import (
     ReplyMessageRequest,
     TextMessage,  # 傳輸回Line官方後台的資料格式
     ImageMessage,
-    TemplateMessage, 
-    ButtonsTemplate, CarouselTemplate, CarouselColumn, ConfirmTemplate,
-    PostbackAction,
-    MessageAction,
-    URIAction,
-    QuickReply, QuickReplyItem
 )
 from linebot.v3.webhooks import (
     MessageEvent, # 傳輸過來的方法
@@ -30,18 +24,15 @@ from linebot.v3.webhooks import (
     ImageMessageContent,
     LocationMessageContent
 )
+import requests
 from handle_keys import get_secret_and_token
-from openai_api import chat_with_chatgpt
-from data_scraper.cwa_opendata_scraper import get_cities_weather
-from computer_vision.imgur_uploader import init_imgur_client, upload_to_imgur
-from computer_vision.mediapipe_cv_tools import init_face_detector, detect_face_with_content_drawing
-from computer_vision.image_format_converter import convert_from_cv2_to_bytes
+from import_modules import *
+from create_linebot_messages_sample import *
 
 app = Flask(__name__)
 keys = get_secret_and_token()
 handler = WebhookHandler(keys['LINEBOT_SECRET_KEY'])
 configuration = Configuration(access_token=keys['LINEBOT_ACCESS_TOKEN'])
-face_detection_model = init_face_detector('computer_vision/cv_models/blaze_face_short_range.tflite')
 
 @app.route("/")
 def say_hello_world(username=""):
@@ -113,12 +104,6 @@ def handle_weather(user_id, user_message, chatgpt_api_key=keys['OPENAI_API_KEY']
     locations_name = user_message.split()[1:] # 取得地點 > NLP:實體辨識
     if locations_name: # 有地點才做事情
         weather_data = get_cities_weather(cwa_api_key, locations_name)
-        '''
-        台中市:
-            xxx: aaa 
-            yyy: bbb
-            zzz: ccc
-        '''
         response = ""
         for location in weather_data: # 取得每一個縣市的名稱
             response += f"{location}:\n" # 加入縣市名稱訊息到response
@@ -133,87 +118,6 @@ def handle_weather(user_id, user_message, chatgpt_api_key=keys['OPENAI_API_KEY']
         response = "請給我你想知道的縣市，請輸入：特務P天氣如何 臺中市 桃園市 彰化市"
     return response
 
-def create_buttons_template(menu_name='Menu', description='Please select'):
-    response = ButtonsTemplate(
-        title=menu_name,
-        text=description,
-        actions=[
-            PostbackAction(
-                label='postback action',
-                display_text='postback text',
-                data='action=buy&itemid=123'
-            ),
-            MessageAction(
-                label='message action',
-                text='message text'
-            ),
-            URIAction(
-                label='uri action',
-                uri='http://example.com/'
-            )
-        ]
-    )
-    return TemplateMessage(
-        type='template',
-        altText="TemplateMessage",
-        template=response
-    )
-
-def create_carousel_template():
-    carousel = CarouselTemplate(columns=[
-        CarouselColumn(
-            text='按鈕文字',
-            title='按鈕標題',
-            thumbnail_image_url='https://i.imgur.com/fz8h8GO.jpeg',
-            actions=[
-                MessageAction(label='發送文字訊息', text='我發送一個文字訊息'),
-                MessageAction(label='講笑話', text='請告訴我一個笑話'),
-                MessageAction(label='推薦餐廳', text='請推薦一個餐廳給我'),
-            ]
-        ),
-        CarouselColumn(
-            text='連結描述',
-            title='連結標題',
-            thumbnail_image_url='https://i.imgur.com/fz8h8GO.jpeg',
-            actions=[
-                URIAction(label='前往GOOGLE', uri='https://www.google.com'),
-                URIAction(label='每個卡片的欄位', uri='https://www.google.com'),
-                URIAction(label='都要一致，所以補行', uri='https://www.google.com')
-            ]
-        )
-    ])
-    return TemplateMessage(
-        type='template',
-        altText="TemplateMessage",
-        template=carousel
-    )
-
-def create_check_template():
-    response = ConfirmTemplate(
-        text='您確定嗎？',
-        actions=[
-            MessageAction(label='是', text='Yes'),
-            MessageAction(label='否', text='No')
-        ]
-    )
-    return TemplateMessage(
-        type='template',
-        altText="TemplateMessage",
-        template=response
-    )
-
-def create_quick_reply():
-    quick_reply_body = QuickReply(items=[
-        QuickReplyItem(action=MessageAction(label='否', text='No')),
-        QuickReplyItem(action=MessageAction(label='否', text='No')),
-        QuickReplyItem(action=URIAction(label='前往GOOGLE', uri='https://www.google.com'))
-    ])
-
-    return TextMessage(
-        text="超快速回覆",
-        quickReply=quick_reply_body
-        
-    )
 
 @handler.add(MessageEvent, message=ImageMessageContent)
 def handle_image(event):
@@ -250,10 +154,7 @@ def handle_image(event):
                 reply_token=event.reply_token,
                 messages=[
                     TextMessage(text=response),
-                    ImageMessage(
-                        originalContentUrl=imgur_link,
-                        previewImageUrl=imgur_link
-                    )
+                    ImageMessage(imgur_link, imgur_link)
                 ]
             )
         )
