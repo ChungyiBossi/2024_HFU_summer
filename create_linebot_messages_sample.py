@@ -102,11 +102,15 @@ def create_check_template():
 
 def create_quick_reply():
     quick_reply_body = QuickReply(items=[
-        QuickReplyItem(action=MessageAction(label='否', text='No')),
-        QuickReplyItem(action=LocationAction(label='current_location', text='我在...')),
-        QuickReplyItem(action=CameraAction(label='camera', text='打開相機')),
-        QuickReplyItem(action=CameraRollAction(label='photos', text='打開相簿')),
-        QuickReplyItem(action=URIAction(label='前往GOOGLE', uri='https://www.google.com'))
+        QuickReplyItem(action=MessageAction(label='按鈕sample', text='按鈕sample')),
+        QuickReplyItem(action=MessageAction(label='輪播sample', text='輪播sample')),
+        QuickReplyItem(action=MessageAction(label='確認sample', text='確認sample')),
+        QuickReplyItem(action=MessageAction(label='快速回覆sample', text='快速回覆sample')),
+        QuickReplyItem(action=LocationAction(label='我在...', text='Location')),
+        QuickReplyItem(action=CameraAction(label='打開相機', text='Camera')),
+        QuickReplyItem(action=CameraRollAction(label='打開相簿', text='Photos')),
+        QuickReplyItem(action=URIAction(label='前往GOOGLE', uri='https://www.google.com')),
+        QuickReplyItem(action=PostbackAction(label='預約', data='key1=value2&key2=value2'))
     ])
 
     return TextMessage(

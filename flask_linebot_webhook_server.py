@@ -20,6 +20,7 @@ from linebot.v3.messaging import (
 )
 from linebot.v3.webhooks import (
     MessageEvent, # 傳輸過來的方法
+    PostbackEvent,
     TextMessageContent, # 使用者傳過來的資料格式
     ImageMessageContent,
     LocationMessageContent
@@ -74,17 +75,9 @@ def handle_message(event):
 
     if '特務P天氣如何' in user_message:
         # 假定的格式: 特務P天氣如何 臺中市 桃園市 彰化市
-        responses = [
-            TextMessage(text=handle_weather(user_id, user_message))
-        ]
-    elif "按鈕sample" in user_message:
-        responses = [create_buttons_template()]
-    elif "輪播sample" in user_message:
-        responses = [create_carousel_template()]
-    elif "確認sample" in user_message:
-        responses = [create_check_template()]
-    elif "快速回覆sample" in user_message:
-        responses = [create_quick_reply()]
+        responses = [TextMessage(text=handle_weather(user_id, user_message))]
+    elif "sample" in user_message:
+        responses = [handle_sample(user_message)]
     else:# 閒聊
         responses = [
             TextMessage(text=chat_with_chatgpt(user_id, user_message, api_key))
@@ -117,6 +110,16 @@ def handle_weather(user_id, user_message, chatgpt_api_key=keys['OPENAI_API_KEY']
     else:
         response = "請給我你想知道的縣市，請輸入：特務P天氣如何 臺中市 桃園市 彰化市"
     return response
+
+def handle_sample(user_message):
+    if "按鈕sample" in user_message:
+        return create_buttons_template()
+    elif "輪播sample" in user_message:
+        return create_carousel_template()
+    elif "確認sample" in user_message:
+        return create_check_template()
+    else:
+        return create_quick_reply()
 
 
 @handler.add(MessageEvent, message=ImageMessageContent)
@@ -154,10 +157,41 @@ def handle_image(event):
                 reply_token=event.reply_token,
                 messages=[
                     TextMessage(text=response),
-                    ImageMessage(imgur_link, imgur_link)
+                    ImageMessage(originalContentUrl=imgur_link, previewImageUrl=imgur_link)
                 ]
             )
         )
+
+@handler.add(MessageEvent, message=LocationMessageContent)
+def handle_locations(event):
+    lat = event.message.latitude
+    lon = event.message.longitude
+    address = event.message.address
+    response = f"({lat},{lon}) \n {address}"
+    with ApiClient(configuration) as api_client:
+        line_bot_api = MessagingApi(api_client)
+        line_bot_api.reply_message_with_http_info(
+            ReplyMessageRequest(
+                reply_token=event.reply_token,
+                messages=[TextMessage(text=str(response))]
+            )
+        )
+
+
+from urllib.parse import parse_qsl
+@handler.add(PostbackEvent) 
+def handle_postback(event):
+    ts = event.postback.data
+    print(parse_qsl(ts))
+    with ApiClient(configuration) as api_client:
+        line_bot_api = MessagingApi(api_client)
+        line_bot_api.reply_message_with_http_info(
+            ReplyMessageRequest(
+                reply_token=event.reply_token,
+                messages=[TextMessage(text="Get PostBack")]
+            )
+        )
+
 
 if __name__ == "__main__":
     app.run(debug=True)
