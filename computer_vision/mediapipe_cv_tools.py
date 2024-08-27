@@ -3,10 +3,30 @@ import cv2
 import numpy as np
 try:
     from .image_collector import put_cv2_text
-    from .image_format_converter import convert_from_bytes_to_cv2, convert_from_cv2_to_bytes
+    from .image_format_converter import convert_from_bytes_to_cv2, convert_from_cv2_to_bytes, convert_from_cv2_to_mediapipe_image, convert_from_mediapipe_image_to_cv2
 except Exception:
     from image_collector import put_cv2_text
-    from image_format_converter import convert_from_bytes_to_cv2, convert_from_cv2_to_bytes
+    from image_format_converter import convert_from_bytes_to_cv2, convert_from_cv2_to_bytes, convert_from_cv2_to_mediapipe_image, convert_from_mediapipe_image_to_cv2
+from mediapipe.framework.formats import landmark_pb2 # 型態轉換
+mp_hands = mp.solutions.hands  # 手部的一些設定
+mp_drawing = mp.solutions.drawing_utils # 繪畫的設定
+mp_drawing_styles = mp.solutions.drawing_styles # 線條的風格
+
+def draw_landmark(cv_image, landmarks, connection): # 畫 landmarks
+    hand_landmarks_proto = landmark_pb2.NormalizedLandmarkList()
+    hand_landmarks_proto.landmark.extend([
+        landmark_pb2.NormalizedLandmark(
+            x=landmark.x, y=landmark.y, z=landmark.z
+        ) 
+        for landmark in landmarks
+    ])
+
+    mp_drawing.draw_landmarks(
+        cv_image,
+        hand_landmarks_proto,
+        connection
+    )
+    cv2.imshow("landmarks", cv_image)
 
 def init_gesture_recognizer(model_path): # 初始化你的手勢辨識模型
     # 實際上工作的類別
@@ -23,21 +43,28 @@ def init_gesture_recognizer(model_path): # 初始化你的手勢辨識模型
     # 組合你的各種設定
     options = GestureRecognizerOptions(
         base_options=BaseOptions(model_asset_buffer=model_file), # 直接讀模型的binary內容，丟給物件。
-        running_mode=VisionRunningMode.IMAGE
+        running_mode=VisionRunningMode.IMAGE,
+        min_hand_detection_confidence=0.3,
+        # min_hand_presence_confidence
     )
     return GestureRecognizer.create_from_options(options)
 
-def recognize_gesture(model, cv2_frame): # 使用模型辨識，並輸出結果
-    # https://ai.google.dev/edge/api/mediapipe/python/mp/Image
-    # cv2 frame -> mp.Image
-    mp_image = mp.Image(image_format=mp.ImageFormat.SRGB, data=cv2_frame)
+def recognize_gesture(model, cv2_frame, is_drawing=True): # 使用模型辨識，並輸出結果
+    mp_image = convert_from_cv2_to_mediapipe_image(cv2_frame)
     # 手勢辨識
     gesture_recognition_result = model.recognize(mp_image)
     # print result
     top_gesture = gesture_recognition_result.gestures
-    if top_gesture: # 是否有辨識出手勢
+    hand_landmarks = gesture_recognition_result.hand_landmarks
+    if top_gesture and hand_landmarks: # 是否有辨識出手勢
         top_gesture = top_gesture[0][0]
         print("Top Gesture: ", top_gesture.category_name, top_gesture.score)
+        if is_drawing:
+            draw_landmark(
+                cv2_frame, 
+                hand_landmarks[0], 
+                mp_hands.HAND_CONNECTIONS
+            )
         return top_gesture.category_name, top_gesture.score
     else: # 沒有辨識出手勢
         print("No Gesture")
@@ -103,7 +130,6 @@ def detect_face_with_content_drawing(model, image_content): # 針對一張圖的
         cv2.rectangle(image_content, start_point, end_point, (0, 255, 255), 3)
     return image_content # 畫好的圖
 
-
 def detect_face_realtime(model, camera_id):
     window_name = "Face Detection"
     camera = cv2.VideoCapture(camera_id)
@@ -138,20 +164,22 @@ def detect_face_realtime(model, camera_id):
     cv2.destroyWindow(window_name)
 
 if __name__ == '__main__':
-    camera_id = 1
+    camera_id = 0
     
-    # # Gesture
-    # model_path = 'cv_models/gesture_recognizer.task'
-    # gesture_model = init_gesture_recognizer(model_path)
-    # recognize_gesture_realtime(gesture_model, camera_id)
+    # Gesture
+    model_path = 'cv_models/gesture_recognizer.task'
+    gesture_model = init_gesture_recognizer(model_path)
+    recognize_gesture_realtime(gesture_model, camera_id)
 
     # # Face
-    model_path = 'cv_models/blaze_face_short_range.tflite'
-    face_detection_model = init_face_detector(model_path)
-    # detect_face_realtime(face_detection_model, camera_id) # real-time detection
+    # model_path = 'cv_models/blaze_face_short_range.tflite'
+    # face_detection_model = init_face_detector(model_path)
+    # # detect_face_realtime(face_detection_model, camera_id) # real-time detection
 
-    with open("test.jpeg", "rb") as image_content: # single image detection
-        output = detect_face_with_content_drawing(face_detection_model, image_content.read())
-        output_bytes = convert_from_cv2_to_bytes(output)
-        with open('test_out.jpeg', 'wb') as file:
-            file.write(output_bytes)
+    # with open("test.jpeg", "rb") as image_content: # single image detection
+    #     output = detect_face_with_content_drawing(face_detection_model, image_content.read())
+    #     output_bytes = convert_from_cv2_to_bytes(output)
+    #     with open('test_out.jpeg', 'wb') as file:
+    #         file.write(output_bytes)
+
+    cv2.destroyAllWindows()
