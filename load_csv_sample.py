@@ -16,12 +16,12 @@ def get_group_sample(group):
 a = rest_dict['breakfast_rest'].get_group('北區').apply(get_group_sample)
 b = rest_dict['lunch_rest'].get_group('北區').apply(get_group_sample)
 c = rest_dict['dinner_rest'].get_group('北區').apply(get_group_sample)
-# pprint(a.values)
-# pprint(b.values)
+
 for sample in c.values:
     name, opentime, phone, section, address, comment = sample
-    print(name, opentime, phone, section, address, comment)
+    # print(name, opentime, phone, section, address, comment)
 
-
-
-print(rest_dict['breakfast_rest'].groups.keys())
+# 根據group數量去取前幾名的區
+group_size = rest_dict['breakfast_rest'].size()
+# print(group_size)
+print(group_size.sort_values(ascending=False).head(3).index.to_list())

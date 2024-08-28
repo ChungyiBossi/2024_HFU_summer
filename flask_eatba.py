@@ -2,7 +2,6 @@ from flask import (
     Flask, 
     request, 
     abort, 
-    render_template
 )
 from linebot.v3 import (
     WebhookHandler
@@ -25,14 +24,13 @@ import pandas as pd
 from handle_keys import get_secret_and_token
 from import_modules import *
 from create_linebot_messages_sample import *
-from collections import defaultdict
 
 app = Flask(__name__)
 keys = get_secret_and_token()
 handler = WebhookHandler(keys['LINEBOT_SECRET_KEY'])
 configuration = Configuration(access_token=keys['LINEBOT_ACCESS_TOKEN'])
 
-rest_recommand_memory = dict()
+rest_recommand_memory = dict()  # 使用者選項暫存記憶
 
 rest_dict = {
     'breakfast_rest': pd.read_csv('taichungeatba/breakfast_rest.csv').dropna(axis=1).groupby('區域'),
@@ -99,7 +97,7 @@ def handle_choose_time():
         template=response
     )
 
-def handle_choose_section(user_id, time_message):
+def handle_choose_section(user_id, time_message, top_n=10):
     def create_quick_reply_item(section_name):
         return QuickReplyItem(action=MessageAction(text=f'#{section_name}', label=f'{section_name}'))
 
@@ -111,10 +109,9 @@ def handle_choose_section(user_id, time_message):
         rest_groups = rest_dict['dinner_rest']
     
     rest_recommand_memory[user_id] = rest_groups
-
-
-    sections = rest_groups.groups.keys()
-    quick_reply_items = [create_quick_reply_item(section) for section in sections]
+    sorted_sections_group_by_size = rest_groups.size().sort_values(ascending=False)
+    sorted_sections = sorted_sections_group_by_size.head(top_n).index.to_list()
+    quick_reply_items = [create_quick_reply_item(section) for section in sorted_sections]
     quick_reply_body = QuickReply(items=quick_reply_items)
 
     return TextMessage(
@@ -150,7 +147,6 @@ def handle_rests_recommand(user_id, section_name):
         altText="TemplateMessage",
         template=carousel
     )
-
 
 
 def handle_sample(user_message):
