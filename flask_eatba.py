@@ -18,10 +18,12 @@ from linebot.v3.messaging import (
 )
 from linebot.v3.webhooks import (
     MessageEvent, # 傳輸過來的方法
+    PostbackEvent,
     TextMessageContent, # 使用者傳過來的資料格式\
 )
 import pandas as pd
 from handle_keys import get_secret_and_token
+from urllib.parse import parse_qsl
 from import_modules import *
 from create_linebot_messages_sample import *
 
@@ -64,7 +66,7 @@ def handle_message(event):
     if "sample" in user_message:
         responses = [handle_sample(user_message)]
     elif '美食推薦' in user_message: # Get Time
-        responses = [handle_choose_time()]
+        responses = [handle_choose_type()]
     elif user_message.startswith('#') and user_message.endswith('餐'): # Get Section
         responses = [handle_choose_section(user_id, user_message)]
     elif user_message.startswith('#') and user_message.endswith('區'): # Get recommand
@@ -81,7 +83,7 @@ def handle_message(event):
             )
         )
 
-def handle_choose_time():
+def handle_choose_type():
     response = ButtonsTemplate(
         title='都幾!!',
         text='請選擇要推薦早餐，午餐，還是晚餐。',
@@ -120,15 +122,20 @@ def handle_choose_section(user_id, time_message, top_n=10):
     )
 
 def handle_rests_recommand(user_id, section_name):
-    def create_rest_col(rest_text, rest_title, rest_comment="", rest_url=""):
+    def create_rest_col(rest_title, rest_text, rest_comment=""):
         url = 'https://www.google.com'
         comment = rest_comment if rest_comment else '這是評論'
+        text_for_postback = f"comment={comment}"
         return CarouselColumn(
-            text=rest_text,
             title=rest_title,
+            text=rest_text,
             thumbnail_image_url='https://i.imgur.com/fz8h8GO.jpeg',
             actions=[
-                MessageAction(label='餐廳評價', text=comment),
+                PostbackAction(
+                    label='餐廳評價',
+                    display_text='取得餐廳評價',
+                    data=text_for_postback
+                ),
                 URIAction(label='餐廳頁面', uri=url),
             ]
         )
@@ -139,8 +146,8 @@ def handle_rests_recommand(user_id, section_name):
     rests = rest_recommand_memory[user_id]
     samples = rests.get_group(section_name).apply(get_group_sample)
     carousel = CarouselTemplate(columns=[
-        create_rest_col(opentime, name, comment, address)
-        for name, opentime, phone, section, address, comment in samples.values
+        create_rest_col(name, opentime, comment)
+        for name, opentime, phone, section, addfress, comment in samples.values
     ])
     return TemplateMessage(
         type='template',
@@ -148,6 +155,19 @@ def handle_rests_recommand(user_id, section_name):
         template=carousel
     )
 
+@handler.add(PostbackEvent) 
+def handle_postback(event):
+    ts = event.postback.data
+    postback_data ={k:v  for k,v in parse_qsl(ts)}
+    response = postback_data.get('comment', "Get PostBack Event!") # 取得評價
+    with ApiClient(configuration) as api_client:
+        line_bot_api = MessagingApi(api_client)
+        line_bot_api.reply_message_with_http_info(
+            ReplyMessageRequest(
+                reply_token=event.reply_token,
+                messages=[TextMessage(text=response)]
+            )
+        )
 
 def handle_sample(user_message):
     if "按鈕sample" in user_message:
