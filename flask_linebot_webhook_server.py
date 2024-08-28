@@ -26,6 +26,7 @@ from linebot.v3.webhooks import (
     LocationMessageContent
 )
 import requests
+from urllib.parse import parse_qsl
 from handle_keys import get_secret_and_token
 from import_modules import *
 from create_linebot_messages_sample import *
@@ -177,8 +178,6 @@ def handle_locations(event):
             )
         )
 
-
-from urllib.parse import parse_qsl
 @handler.add(PostbackEvent) 
 def handle_postback(event):
     ts = event.postback.data
