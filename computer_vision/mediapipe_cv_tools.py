@@ -3,10 +3,10 @@ import cv2
 import numpy as np
 try:
     from .image_collector import put_cv2_text
-    from .image_format_converter import convert_from_bytes_to_cv2, convert_from_cv2_to_bytes, convert_from_cv2_to_mediapipe_image, convert_from_mediapipe_image_to_cv2
+    from .image_format_converter import convert_from_bytes_to_cv2, convert_from_cv2_to_mediapipe_image, convert_from_mediapipe_image_to_cv2
 except Exception:
     from image_collector import put_cv2_text
-    from image_format_converter import convert_from_bytes_to_cv2, convert_from_cv2_to_bytes, convert_from_cv2_to_mediapipe_image, convert_from_mediapipe_image_to_cv2
+    from image_format_converter import convert_from_bytes_to_cv2, convert_from_cv2_to_mediapipe_image, convert_from_mediapipe_image_to_cv2
 from mediapipe.framework.formats import landmark_pb2 # 型態轉換
 mp_hands = mp.solutions.hands  # 手部的一些設定
 mp_drawing = mp.solutions.drawing_utils # 繪畫的設定
