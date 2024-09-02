@@ -67,3 +67,7 @@ jobs:
           app-name: 'linebot'
           slot-name: 'Production'
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_9E3FDD40A96B41EDA8799DF1741311CE }}
+
+      - name: Run Flask
+        run: |
+          python flask_eatby.py

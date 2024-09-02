@@ -39,6 +39,9 @@ rest_dict = {
     'lunch_rest': pd.read_csv('taichungeatba/lunch_rest.csv').dropna(axis=1).groupby('區域'),
     'dinner_rest': pd.read_csv('taichungeatba/dinner_rest.csv').dropna(axis=1).groupby('區域')
 }
+@app.route("/")
+def hello():
+    return "Hello World!!"
 
 @app.route("/callback", methods=['POST'])
 def callback():
