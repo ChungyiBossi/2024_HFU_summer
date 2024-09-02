@@ -70,4 +70,4 @@ jobs:
 
       - name: Run Flask
         run: |
-          python flask_eatby.py
+          python flask_eatba.py
