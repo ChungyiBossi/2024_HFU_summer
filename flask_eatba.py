@@ -133,7 +133,7 @@ def handle_rests_recommand(user_id, section_name):
             actions=[
                 PostbackAction(
                     label='餐廳評價',
-                    display_text='取得餐廳評價',
+                    displayText='取得餐廳評價',
                     data=text_for_postback
                 ),
                 URIAction(label='餐廳頁面', uri=url),

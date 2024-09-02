@@ -12,6 +12,8 @@ mp_hands = mp.solutions.hands  # 手部的一些設定
 mp_drawing = mp.solutions.drawing_utils # 繪畫的設定
 mp_drawing_styles = mp.solutions.drawing_styles # 線條的風格
 
+mp_poses = mp.solutions.pose.POSE_CONNECTIONS
+
 def draw_landmark(cv_image, landmarks, connection): # 畫 landmarks
     hand_landmarks_proto = landmark_pb2.NormalizedLandmarkList()
     hand_landmarks_proto.landmark.extend([
