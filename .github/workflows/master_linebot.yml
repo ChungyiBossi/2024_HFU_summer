@@ -66,4 +66,4 @@ jobs:
         with:
           app-name: 'linebot'
           slot-name: 'Production'
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_0ABFCFE11B9F4F15B575F8B93B4E01AD }}
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_9E3FDD40A96B41EDA8799DF1741311CE }}
