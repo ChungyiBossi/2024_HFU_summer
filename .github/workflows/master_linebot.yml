@@ -68,6 +68,15 @@ jobs:
           slot-name: 'Production'
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_CF4BB05884164E909DEE3DCFF348B3A8 }}
       
+      - name: Create and start virtual environment
+        run: |
+          python -m venv venv
+          source venv/bin/activate
+        
+      - name: Install dependencies
+        run: pip install -r requirements.txt      
+
+
       - name: Run Flask
         run: |
           python flask_eatba.py
