@@ -5,6 +5,8 @@ on:
   push:
     branches:
       - master
+env:
+  PYTHON_VERSION: '3.12'
 jobs:
   build_and_deploy:
     runs-on: ubuntu-latest
@@ -15,7 +17,7 @@ jobs:
       - name: Set up Python version
         uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: ${{ env.PYTHON_VERSION }}
 
       # - name: Create and start virtual environment
       #   run: |
@@ -28,7 +30,8 @@ jobs:
 
       - name: Building web app
         uses: azure/appservice-build@v2
-  
+        with:
+          platform-version: ${{ env.PYTHON_VERSION }}
         
       # # Optional: Add step to run tests here (PyTest, Django test suites, etc.)
 
