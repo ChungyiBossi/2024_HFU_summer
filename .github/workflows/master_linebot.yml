@@ -31,7 +31,8 @@ jobs:
       - name: Building web app
         uses: azure/appservice-build@v2
         with:
-          platform-version: "Python ${{ env.PYTHON_VERSION }}"
+          platform: python
+          platform-version: ${{ env.PYTHON_VERSION }}
         
       # # Optional: Add step to run tests here (PyTest, Django test suites, etc.)
 
