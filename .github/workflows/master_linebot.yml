@@ -18,34 +18,17 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: ${{ env.PYTHON_VERSION }}
-
-      # - name: Create and start virtual environment
-      #   run: |
-      #     python -m venv venv
-      #     source venv/bin/activate
       
       - name: Install dependencies
         run: pip install -r requirements.txt
 
-      # https://github.com/azure/appservice-build/tree/v2/?tab=readme-ov-file#sample-workflow-to-build-and-deploy-an-azure-web-app
-      - name: Building web app
-        uses: azure/appservice-build@v2
-        with:
-          platform: python
-          platform-version: ${{ env.PYTHON_VERSION }}
-        
-      # # Optional: Add step to run tests here (PyTest, Django test suites, etc.)
-
-      # - name: Zip artifact for deployment
-      #   run: zip release.zip ./* -r
-
-      # - name: Upload artifact for deployment jobs
-      #   uses: actions/upload-artifact@v4
+      # # oryx 支援 python 版本太舊 (python 3.8)
+      # # https://github.com/azure/appservice-build/tree/v2/?tab=readme-ov-file#sample-workflow-to-build-and-deploy-an-azure-web-app
+      # - name: Building web app
+      #   uses: azure/appservice-build@v2
       #   with:
-      #     name: python-app
-      #     path: |
-      #       release.zip
-      #       !venv/
+      #     platform: python
+      #     platform-version: ${{ env.PYTHON_VERSION }}
 
       - name: 'Deploy to Azure Web App'
         uses: azure/webapps-deploy@v3
