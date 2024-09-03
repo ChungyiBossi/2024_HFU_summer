@@ -27,11 +27,11 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
-
+      # https://github.com/azure/appservice-build/tree/v2/?tab=readme-ov-file#sample-workflow-to-build-and-deploy-an-azure-web-app
       - name: Building web app
         uses: azure/appservice-build@v2
         with:
-          platform-version: ${{ env.PYTHON_VERSION }}
+          platform-version: "Python ${{ env.PYTHON_VERSION }}"
         
       # # Optional: Add step to run tests here (PyTest, Django test suites, etc.)
 
