@@ -42,7 +42,6 @@ jobs:
           path: |
             release.zip
             !venv/
-
   deploy:
     runs-on: ubuntu-latest
     needs: build
@@ -76,14 +75,14 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt      
 
+      # - name: Run Flask
+      #   env:
+      #     CWA_API_KEY: ${{ secrets.CWA_API_KEY }}
+      #     OPENAI_API_KEY:  ${{ secrets.OPENAI_API_KEY }}
+      #     LINEBOT_SECRET_KEY:  ${{ secrets.LINEBOT_SECRET_KEY }}
+      #     LINEBOT_ACCESS_TOKEN:  ${{ secrets.LINEBOT_ACCESS_TOKEN }}
+      #     IMGUR_CLIENT_ID:  ${{ secrets.IMGUR_CLIENT_ID }}
+      #     IMGUR_SECRET_KEY:  ${{ secrets.IMGUR_SECRET_KEY }}
+      #   run: |
+      #     python flask_eatba.py
 
-      - name: Run Flask
-        env:
-          CWA_API_KEY: ${{ secrets.CWA_API_KEY }}
-          OPENAI_API_KEY:  ${{ secrets.OPENAI_API_KEY }}
-          LINEBOT_SECRET_KEY:  ${{ secrets.LINEBOT_SECRET_KEY }}
-          LINEBOT_ACCESS_TOKEN:  ${{ secrets.LINEBOT_ACCESS_TOKEN }}
-          IMGUR_CLIENT_ID:  ${{ secrets.IMGUR_CLIENT_ID }}
-          IMGUR_SECRET_KEY:  ${{ secrets.IMGUR_SECRET_KEY }}
-        run: |
-          python flask_eatba.py
