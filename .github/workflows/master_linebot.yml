@@ -22,6 +22,11 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
+      - name: Create and start virtual environment
+        run: |
+          python -m venv venv
+          source venv/bin/activate
+
       # # oryx 支援 python 版本太舊 (python 3.8)
       # # https://github.com/azure/appservice-build/tree/v2/?tab=readme-ov-file#sample-workflow-to-build-and-deploy-an-azure-web-app
       # - name: Building web app
