@@ -63,4 +63,3 @@ jobs:
           app-name: 'linebot'
           slot-name: 'Production'
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_CF4BB05884164E909DEE3DCFF348B3A8 }}
-          startup-command: ${{ env.STARTUP_COMMAND }}
