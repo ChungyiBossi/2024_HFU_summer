@@ -6,7 +6,7 @@ on:
     branches:
       - master
 jobs:
-  build:
+  build_and_deploy:
     runs-on: ubuntu-latest
 
     steps:
@@ -17,13 +17,18 @@ jobs:
         with:
           python-version: '3.12'
 
-      - name: Create and start virtual environment
-        run: |
-          python -m venv venv
-          source venv/bin/activate
+      # - name: Create and start virtual environment
+      #   run: |
+      #     python -m venv venv
+      #     source venv/bin/activate
       
       - name: Install dependencies
         run: pip install -r requirements.txt
+
+
+      - name: Building web app
+        uses: azure/appservice-build@v2
+  
         
       # # Optional: Add step to run tests here (PyTest, Django test suites, etc.)
 
