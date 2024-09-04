@@ -1,0 +1,32 @@
+name: Build Python Flask App And Test
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - master
+env:
+  PYTHON_VERSION: '3.12'
+jobs:
+  build_and_test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python version
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Create and start virtual environment
+        run: |
+          python -m venv venv
+          source venv/bin/activate
+      
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run unittest
+        run: |
+          pip install pytest
